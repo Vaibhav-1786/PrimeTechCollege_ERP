@@ -1,97 +1,54 @@
 # Security Policy
 
-## Supported Versions
+PrimeTechCollege_ERP handles student and faculty records, fee payments, results and private messages. Security reports are taken seriously.
 
-College Campus Connect is deployed as a single running instance rather than
-distributed as a versioned package, so security fixes are applied to the
-active deployment branch rather than backported across release lines.
+## Supported versions
 
-| Branch / Deployment       | Supported          |
-| -------------------------- | ------------------ |
-| `main` (production)        | :white_check_mark: |
-| Active feature branches    | :white_check_mark: |
-| Archived / superseded forks | :x:                |
+Only the latest commit on the `main` branch receives security fixes.
 
-If you are running a fork or an older snapshot of this codebase, you are
-responsible for pulling in fixes yourself — please don't expect patches to be
-backported to it.
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+**Please do not open a public issue for security problems.**
 
-**Please do not open a public GitHub issue for security vulnerabilities.**
-Given the modules involved (authentication, admissions, fee payments via
-Razorpay, and the AI assistant proxy), even a minimal repro can be enough for
-misuse if it's public before a fix ships.
+1. Use GitHub's private reporting: **Security → Report a vulnerability** on this repository (preferred), or
+2. Email the maintainer, Vaibhav Chauhan, at "vaibhavchauhan1786@gmail.com".
 
-Instead, report privately using one of the following:
+Please include a description, impact, steps to reproduce (endpoint, role, request/response) and a suggested fix if you have one. You can expect an acknowledgement within **7 days** and a status update within **14 days**. Please allow reasonable time for a fix before public disclosure.
 
-- **GitHub Private Vulnerability Reporting** — open the repository's
-  **Security** tab → **Report a vulnerability**, if enabled for this repo.
-- **Email** — send details to the maintainer's contact email listed on the
-  repository's GitHub profile / organization page.
+### In scope
+Role bypass between admin / faculty / student, access to another student's results, fees or messages, authentication or session-token flaws, SQL injection, Telegram webhook spoofing, payment/receipt tampering, secrets exposure.
 
-When reporting, please include:
+### Out of scope
+Issues that exist only because development defaults were left in production (see checklist), denial of service by volume, social engineering, and flaws in third-party services (Razorpay, OpenRouter, Telegram, hosting).
 
-- A description of the vulnerability and its potential impact.
-- Steps to reproduce (a minimal example is ideal).
-- Which component is affected — frontend, the PHP API (`backend/api/`), the
-  Node/Socket.IO realtime server (`backend/server.js`), or the database
-  schema.
-- Whether the issue requires authentication, and if so, which role
-  (admin / faculty / student).
+## Security measures in the project
 
-### What to expect
+- Role-based access (admin / faculty / student), checked in the frontend (`rbac.js`) and in the PHP endpoints.
+- Admin sessions are server-signed using `APP_TOKEN_SECRET`.
+- The OpenRouter API key stays server-side; the AI proxy limits conversation length and message/payload size.
+- Telegram webhook requests are validated against `TELEGRAM_WEBHOOK_SECRET`.
+- PDO is used for database access in the PHP API.
+- `backend/.env` and `frontend/dist/` are gitignored.
 
-- **Acknowledgement** within 3 business days of your report.
-- **Initial assessment** (severity and affected components) within 7 days.
-- **Status updates** at least every 7 days until the issue is resolved,
-  more frequently for high-severity reports.
-- **Resolution or mitigation** timeline depends on severity:
-  - Critical (e.g. auth bypass, payment tampering, remote code execution,
-    SQL injection): fix targeted within 7 days.
-  - High (e.g. privilege escalation between roles, data exposure): fix
-    targeted within 14 days.
-  - Medium/Low (e.g. missing hardening, non-exploitable misconfiguration):
-    fix scheduled into the normal development cycle.
+## Production deployment checklist
 
-If a report is **accepted**, you'll be credited in the fix's changelog entry
-unless you ask to remain anonymous, and notified when the fix is deployed.
-If a report is **declined** (not reproducible, out of scope, or judged not to
-be a vulnerability), you'll get an explanation of the reasoning and are
-welcome to provide additional evidence for reconsideration.
+The repository ships with **development defaults**. Before going live:
 
-### Scope
+- [ ] **Change the static admin credentials.** `STATIC_ADMIN_EMAIL` / `STATIC_ADMIN_PASSWORD` are constants in `backend/config/helpers.php`; move them into `.env` and use a strong password.
+- [ ] Generate a long random `APP_TOKEN_SECRET` (`php -r "echo bin2hex(random_bytes(32));"`).
+- [ ] **Enforce student and faculty authorisation in PHP.** Their sessions are managed client-side, so every endpoint must verify identity and ownership on the server — never rely on `AuthContext` or `rbac.js` alone.
+- [ ] Set `TELEGRAM_WEBHOOK_SECRET` and keep `TELEGRAM_BOT_TOKEN` private.
+- [ ] Set `CLIENT_URL` / `EXTRA_CLIENT_URLS` to your real origins only.
+- [ ] Switch `frontend/src/utils/api.js` base URLs and Razorpay to the correct environment; use Live Razorpay button IDs only after testing, and confirm payments server-side.
+- [ ] Use a dedicated MySQL user with least privilege, not `root`.
+- [ ] Serve everything over HTTPS; run PHP through PHP-FPM and `backend/server.js` under PM2/systemd.
+- [ ] Do not use `php -S` in production.
+- [ ] Keep `backend/.env` out of git; rotate any secret that was ever committed.
+- [ ] Protect student data according to applicable law (e.g. India's DPDP Act 2023).
 
-In scope:
-- Authentication and session handling (`backend/api/auth.php`,
-  `frontend/src/contexts/AuthContext.jsx`, `frontend/src/utils/rbac.js`)
-- Authorization / role boundaries between admin, faculty, and student
-- The PHP REST API (`backend/api/*.php`) and its database access
-- The Node/Socket.IO realtime server (`backend/server.js`)
-- Payment flows involving Razorpay Payment Buttons
-- The AI assistant proxy (`backend/api/ai-assistant.php`) — e.g. prompt
-  injection that leaks other students' data, key exposure, injection into the
-  OpenRouter request
-- The Telegram webhook handler (`backend/api/telegram_webhook.php`)
-- SQL injection, XSS, CSRF, IDOR, and insecure direct file access
+## Known limitations
 
-Out of scope:
-- Findings that require access to `backend/.env` or database credentials you
-  should not already have
-- Denial-of-service via raw traffic volume (report application-logic DoS,
-  e.g. unbounded queries, separately)
-- Social engineering against maintainers or users
-- Issues in third-party dependencies — please report those to the upstream
-  project, though a link here is still appreciated so we can track exposure
-
-### A note on this project's current security posture
-
-This is an actively developed student/college project, and a few known gaps
-are documented in the [README](README.md#security-notes) rather than hidden:
-static admin credentials defined in `backend/config/helpers.php`, and a
-client-managed (non-server-signed) session model for student/faculty users.
-These are known, tracked issues, not undisclosed vulnerabilities — you're
-welcome to report hardening suggestions for them, but please reference the
-README section so reports aren't duplicated.
-
-Thank you for helping keep College Campus Connect and its users' data safe.
+- Admin sign-in uses static credentials rather than a database user.
+- Student/faculty session state lives in the browser (`localStorage`), so it is readable by any script on the page; a strict Content-Security-Policy is recommended.
+- No automated test suite is documented yet.
+- The AI assistant sends student prompts (with course and semester context) to a third-party provider (OpenRouter).
