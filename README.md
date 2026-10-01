@@ -1,5 +1,11 @@
 # PrimeTechCollege_ERP
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![React](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61dafb)
+![PHP](https://img.shields.io/badge/API-PHP%208-777bb4)
+![Node](https://img.shields.io/badge/Realtime-Node.js%20%2B%20Socket.IO-339933)
+![MySQL](https://img.shields.io/badge/Database-MySQL%208-4479a1)
+
 A full-stack campus management and community platform for colleges — combining a student social feed with the administrative machinery a campus actually runs on: admissions, fee collection, results and marksheets, timetables, attendance, transport and a suggestion box.
 
 Built with a React + Vite frontend, a PHP REST API for the core modules, and a small Node.js/Socket.IO service for real-time chat and presence, all on a shared MySQL database.
@@ -25,6 +31,8 @@ Built with a React + Vite frontend, a PHP REST API for the core modules, and a s
 - [Building for Production](#building-for-production)
 - [Security Notes](#security-notes)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -115,16 +123,20 @@ college-campus-connect/
 │
 ├── database/                 # schema + seed SQL (see load order below)
 │
-└── frontend/
-    ├── src/
-    │   ├── components/       # layout, feed, widgets, modals
-    │   ├── contexts/         # AuthContext
-    │   ├── pages/            # route-level pages
-    │   │   └── admin/        # admin management panels
-    │   ├── utils/            # api.js, rbac.js, PDF generators
-    │   ├── config/           # razorpay.js
-    │   └── styles/
-    └── vite.config.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/       # layout, feed, widgets, modals
+│   │   ├── contexts/         # AuthContext
+│   │   ├── pages/            # route-level pages
+│   │   │   └── admin/        # admin management panels
+│   │   ├── utils/            # api.js, rbac.js, PDF generators
+│   │   ├── config/           # razorpay.js
+│   │   └── styles/
+│   └── vite.config.js
+│
+├── LICENSE
+├── SECURITY.md
+└── README.md
 ```
 
 ---
@@ -335,7 +347,8 @@ your production origins so CORS and Socket.IO accept them.
 
 ## Security Notes
 
-A few things worth knowing before deploying this publicly:
+A few things worth knowing before deploying this publicly (the vulnerability-reporting
+process and a full production checklist are in **[SECURITY.md](SECURITY.md)**):
 
 - **Admin credentials are static.** `STATIC_ADMIN_EMAIL` and
   `STATIC_ADMIN_PASSWORD` are defined as constants in
@@ -372,3 +385,17 @@ Confirm the Node server is running on `PORT` and that `NODE_BASE` in
 **Admin actions work but do not appear in the activity log.**
 Run `database/schema_static_admin_seed.sql`. The log insert fails its foreign
 key check without that placeholder row; the action itself always succeeds.
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. For larger changes please open an issue first, keep database
+changes in clearly named SQL files, and never commit secrets (`backend/.env`, API keys, bot
+tokens) or real student data.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE) © 2026 Vaibhav Chauhan.
