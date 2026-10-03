@@ -98,9 +98,9 @@ Built with a React + Vite frontend, a PHP REST API for the core modules, and a s
 
 👉 **[Watch the Demo Video](https://ireel.today/v/b8af0b236c)**
 
-## Project Structure
-
 ---
+
+## Project Structure
 
 ```
 college-campus-connect/
