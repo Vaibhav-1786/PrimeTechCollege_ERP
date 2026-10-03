@@ -17,6 +17,7 @@ Built with a React + Vite frontend, a PHP REST API for the core modules, and a s
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
+- [Project Demo](#Project-Demo)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
@@ -92,6 +93,10 @@ Built with a React + Vite frontend, a PHP REST API for the core modules, and a s
 <img width="7662" height="4175" alt="diagram" src="https://github.com/user-attachments/assets/8d647091-cc6c-4a46-90fe-ddf951a9515a" />
 
 ---
+
+## Project Demo
+
+👉 **[Watch the Demo Video](https://ireel.today/v/b8af0b236c)**
 
 ## Project Structure
 
