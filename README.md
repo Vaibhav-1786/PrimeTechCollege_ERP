@@ -100,6 +100,8 @@ Built with a React + Vite frontend, a PHP REST API for the core modules, and a s
 
 ## Project Structure
 
+---
+
 ```
 college-campus-connect/
 ├── backend/
